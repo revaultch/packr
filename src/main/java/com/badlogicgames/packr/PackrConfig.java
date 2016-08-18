@@ -56,6 +56,26 @@ public class PackrConfig {
 			}
 			throw new IOException("Invalid platform '" + desc + "'");
 		}
+
+		public static Platform thisPlatform() {
+
+			String os = System.getProperty("os.name");
+			String arch = System.getProperty("os.arch");
+			if (os.matches("(?i).*mac.*")) {
+				return Platform.MacOS;
+			}
+			if (os.matches("(?i).*windows.*")) {
+				if (arch.endsWith("64")) {
+					return Platform.Windows64;
+				}
+				return Platform.Windows32;
+			}
+
+			if (arch.endsWith("64")) {
+				return Platform.Linux64;
+			}
+			return Platform.Linux32;
+		}
 	}
 
 	public Platform platform;
