@@ -16,12 +16,15 @@
 
 package com.badlogicgames.packr;
 
+import com.badlogicgames.packr.windows.IconUtil;
 import com.lexicalscope.jewel.cli.ArgumentValidationException;
 import com.lexicalscope.jewel.cli.CliFactory;
 import com.lexicalscope.jewel.cli.ValidationFailure;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.zeroturnaround.zip.ZipUtil;
+import static com.badlogicgames.packr.PackrConfig.Platform.Windows32;
+import static com.badlogicgames.packr.PackrConfig.Platform.Windows64;
 
 import java.io.File;
 import java.io.IOException;
@@ -109,12 +112,22 @@ public class Packr {
 
 		if (config.iconResource != null) {
 			// copy icon to Contents/Resources/icons.icns
+			if (!config.iconResource.exists()) {
+				config.iconResource = changeExtension(config.iconResource, ".icns");
+			}
 			if (config.iconResource.exists()) {
 				FileUtils.copyFile(config.iconResource, new File(resources, "icons.icns"));
 			}
 		}
 
 		return new PackrOutput(target, resources);
+	}
+
+	private File changeExtension(File in, String extension) {
+		if (in == null) {
+			return null;
+		}
+		return new File(in.getParentFile(), in.getName().replaceAll("(?i)\\.[^.]+$", "") + extension);
 	}
 
 	private void copyExecutableAndClasspath(PackrOutput output) throws IOException {
@@ -142,8 +155,11 @@ public class Packr {
 		}
 
 		System.out.println("Copying executable ...");
-		FileUtils.writeByteArrayToFile(new File(output.executableFolder, config.executable + extension), exe);
-		PackrFileUtils.chmodX(new File(output.executableFolder, config.executable + extension));
+		File exeTarget = new File(output.executableFolder, config.executable + extension);
+		FileUtils.writeByteArrayToFile(exeTarget, exe);
+		addWindowsIcons(exeTarget);
+
+		PackrFileUtils.chmodX(exeTarget);
 
 		System.out.println("Copying classpath(s) ...");
 		for (String file : config.classpath) {
@@ -157,6 +173,16 @@ public class Packr {
 			} else {
 				System.err.println("Warning! Classpath not found: " + cpSrc);
 			}
+		}
+	}
+
+	private void addWindowsIcons(File exeTarget) {
+		if (config.iconResource == null || config.platform != Windows32 && config.platform != Windows64) {
+			return;
+		}
+		config.iconResource = changeExtension(config.iconResource, ".ico");
+		if (config.iconResource.exists()) {
+			IconUtil.replaceAllIcons(exeTarget, config.iconResource);
 		}
 	}
 

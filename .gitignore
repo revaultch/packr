@@ -10,3 +10,4 @@ native/packr.sln
 native/packr.vcxproj*
 .idea/
 *.iml
+bin
