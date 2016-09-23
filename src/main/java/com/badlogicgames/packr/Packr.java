@@ -91,7 +91,7 @@ public class Packr {
 
 		values.put("${executable}", config.executable);
 
-		if (config.bundleIdentifier != null) {
+		if (config.bundleIdentifier != null && !config.bundleIdentifier.isEmpty()) {
 			values.put("${bundleIdentifier}", config.bundleIdentifier);
 		} else {
 			values.put("${bundleIdentifier}", config.mainClass.substring(0, config.mainClass.lastIndexOf('.')));

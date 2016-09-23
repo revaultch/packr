@@ -20,9 +20,15 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 import com.badlogicgames.packr.PackrConfig;
@@ -34,12 +40,15 @@ public class PackrTask extends DefaultTask {
 
 	public PackrTask() {
 		this.config = new PackrConfig();
+		this.config.minimizeJre = "none";
+		this.config.bundleIdentifier = "";
 		this.config.classpath = new ArrayList<String>();
 		this.config.vmArgs = new ArrayList<String>();
 		this.config.platform = Platform.thisPlatform();
 		this.config.jdk = System.getProperty("java.home");
 		this.config.executable = getProject().getName();
 		this.config.resources = new ArrayList<File>();
+
 		String suffix = "";
 		if (config.platform == Platform.MacOS) {
 			suffix = ".app";
@@ -73,12 +82,22 @@ public class PackrTask extends DefaultTask {
 		config.resources = files;
 	}
 
+	@InputFiles
+	public List<File> getResources() {
+		return config.resources;
+	}
+
 	public void vmArgs(String vmArgs) {
 		config.vmArgs.add(vmArgs);
 	}
 
 	public void vmArgs(List<String> vmArgs) {
 		config.vmArgs = vmArgs;
+	}
+
+	@Input
+	public List<String> getVmArgs() {
+		return config.vmArgs;
 	}
 
 	public void classpath(String classpath) {
@@ -89,36 +108,89 @@ public class PackrTask extends DefaultTask {
 		config.classpath = classpath;
 	}
 
+	@InputFiles
+	public ConfigurableFileCollection getClasspath() {
+		return getProject().files(config.classpath);
+	}
+
 	public void mainClass(String mainClass) {
 		config.mainClass = mainClass;
+		if (config.bundleIdentifier == null) {
+			mainClass.substring(0, mainClass.lastIndexOf('.'));
+		}
+	}
+
+	@Input
+	public String getMainClass() {
+		return config.mainClass;
 	}
 
 	public void platform(Platform platform) {
 		config.platform = platform;
 	}
 
+	@Input
+	public Platform getPlatform() {
+		return config.platform;
+	}
+
 	public void jdk(String jdk) {
 		config.jdk = jdk;
+	}
+
+	@InputDirectory
+	public File getJdk() {
+		return getProject().file(config.jdk);
 	}
 
 	public void executable(String executable) {
 		config.executable = executable;
 	}
 
+	@Input
+	public String getExecutable() {
+		return config.executable;
+	}
+
 	public void minimizeJre(String minimizeJre) {
 		config.minimizeJre = minimizeJre;
+	}
+
+	@Input
+	public String getMinimizeJre() {
+		return config.minimizeJre;
 	}
 
 	public void outDir(String outDir) {
 		config.outDir = getProject().file(outDir);
 	}
 
+	@OutputDirectory
+	public File getOutDir() {
+		return config.outDir;
+	}
+
 	public void iconResource(String iconResource) {
 		config.iconResource = getProject().file(iconResource);
+	}
+
+	@InputFiles
+	public List<File> getIconDirs() {
+		List<File> r = new ArrayList<File>();
+		for (File f : Arrays.asList(new File(config.iconResource + ".ico"), new File(config.iconResource + ".icns"))) {
+			if (f.exists()) {
+				r.add(f);
+			}
+		}
+		return r;
 	}
 
 	public void bundleIdentifier(String bundleIdentifier) {
 		config.bundleIdentifier = bundleIdentifier;
 	}
 
+	@Input
+	public String getBundleIdentifier() {
+		return config.bundleIdentifier;
+	}
 }

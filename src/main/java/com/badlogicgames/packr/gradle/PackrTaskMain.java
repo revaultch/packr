@@ -49,7 +49,7 @@ public class PackrTaskMain {
 		String pathSeparator = File.pathSeparator;
 		StringBuilder cp = new StringBuilder();
 		for (URL u : urls()) {
-			if (u.toExternalForm().matches(".*/packr/.*\\.jar$")) {
+			if (u.toExternalForm().matches(".*/packr[/-].*\\.jar$")) {
 				cp.append(new File(u.toURI()).getAbsolutePath()).append(pathSeparator);
 			}
 		}
