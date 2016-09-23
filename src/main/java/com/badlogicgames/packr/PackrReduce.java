@@ -16,14 +16,24 @@
 
 package com.badlogicgames.packr;
 
-import com.eclipsesource.json.*;
+import static java.io.File.separatorChar;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.zeroturnaround.zip.ZipUtil;
 
-import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
+import com.badlogicgames.packr.PackrConfig.Platform;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 /**
  * Functions to reduce package size for both classpath JARs, and the bundled JRE.
@@ -205,7 +215,8 @@ class PackrReduce {
 			}
 
 			Set<String> extensions = new HashSet<String>();
-
+			EnumSet<Platform> otherPlatforms = EnumSet.allOf(Platform.class);
+			otherPlatforms.remove(config.platform);
 			switch (config.platform) {
 				case Windows32:
 				case Windows64:
@@ -221,12 +232,22 @@ class PackrReduce {
 					extensions.add(".dll");
 					extensions.add(".so");
 					break;
+				default:
+					break;
 			}
-
+			
 			for (Object obj : FileUtils.listFiles(jarDir, TrueFileFilter.INSTANCE , TrueFileFilter.INSTANCE)) {
 				File file = new File(obj.toString());
 				for (String extension: extensions) {
 					if (file.getName().endsWith(extension)) {
+						if (config.verbose) {
+							System.out.println("  # Removing '" + file.getPath() + "'");
+						}
+						PackrFileUtils.delete(file);						
+					}
+				}
+				for (Platform platform: otherPlatforms) {
+					if (file.exists() && file.getPath().contains(separatorChar + platform.jnaPath + separatorChar)) {
 						if (config.verbose) {
 							System.out.println("  # Removing '" + file.getPath() + "'");
 						}

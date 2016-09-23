@@ -16,13 +16,6 @@
 
 package com.badlogicgames.packr;
 
-import com.badlogicgames.packr.windows.IconUtil;
-import com.lexicalscope.jewel.cli.ArgumentValidationException;
-import com.lexicalscope.jewel.cli.CliFactory;
-import com.lexicalscope.jewel.cli.ValidationFailure;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.zeroturnaround.zip.ZipUtil;
 import static com.badlogicgames.packr.PackrConfig.Platform.Windows32;
 import static com.badlogicgames.packr.PackrConfig.Platform.Windows64;
 
@@ -34,9 +27,19 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.zeroturnaround.zip.ZipUtil;
+
+import com.badlogicgames.packr.windows.IconUtil;
+import com.lexicalscope.jewel.cli.ArgumentValidationException;
+import com.lexicalscope.jewel.cli.CliFactory;
+import com.lexicalscope.jewel.cli.ValidationFailure;
+
 /**
- * Takes a couple of parameters and a JRE and bundles them into a platform specific
- * distributable (zip on Windows and Linux, app bundle on Mac OS X).
+ * Takes a couple of parameters and a JRE and bundles them into a platform
+ * specific distributable (zip on Windows and Linux, app bundle on Mac OS X).
+ * 
  * @author badlogic
  *
  */
@@ -135,23 +138,25 @@ public class Packr {
 		String extension = "";
 
 		switch (config.platform) {
-			case Windows32:
-				exe = readResource("/packr-windows.exe");
-				extension = ".exe";
-				break;
-			case Windows64:
-				exe = readResource("/packr-windows-x64.exe");
-				extension = ".exe";
-				break;
-			case Linux32:
-				exe = readResource("/packr-linux");
-				break;
-			case Linux64:
-				exe = readResource("/packr-linux-x64");
-				break;
-			case MacOS:
-				exe = readResource("/packr-mac");
-				break;
+		case Windows32:
+			exe = readResource("/packr-windows.exe");
+			extension = ".exe";
+			break;
+		case Windows64:
+			exe = readResource("/packr-windows-x64.exe");
+			extension = ".exe";
+			break;
+		case Linux32:
+			exe = readResource("/packr-linux");
+			break;
+		case Linux64:
+			exe = readResource("/packr-linux-x64");
+			break;
+		case MacOS:
+			exe = readResource("/packr-mac");
+			break;
+		default:
+			break;
 		}
 
 		System.out.println("Copying executable ...");
@@ -252,8 +257,14 @@ public class Packr {
 		if (jre == null) {
 			throw new IOException("Couldn't find JRE in JDK, see '" + tmp.getAbsolutePath() + "'");
 		}
+		File jreDest = new File(output.resourcesFolder, "jre");
+		FileUtils.moveDirectory(jre, jreDest);
 
-		FileUtils.copyDirectory(jre, new File(output.resourcesFolder, "jre"));
+		// Spawn helper is need to fork/execute processes
+		File spawnHalper = new File(new File(jreDest, "lib"), "jspawnhelper");
+		if (spawnHalper.exists()) {
+			spawnHalper.setExecutable(true);
+		}
 		FileUtils.deleteDirectory(tmp);
 
 		if (fetchFromRemote) {

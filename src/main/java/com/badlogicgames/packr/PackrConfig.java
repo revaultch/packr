@@ -36,16 +36,35 @@ import java.util.List;
 public class PackrConfig {
 
 	public enum Platform {
-		Windows32("windows32"),
-		Windows64("windows64"),
-		Linux32("linux32"),
-		Linux64("linux64"),
-		MacOS("mac");
-
+		Windows32      ("windows32", "win32-x86"),
+		Windows64      ("windows64", "win32-x86-64"),
+		Linux32        ("linux32", "linux-x86"),
+		Linux64        ("linux64", "linux-x86-64"),
+		MacOS          ("mac", "darwin"),
+		aix_ppc        ("aix-ppc", "aix-ppc"),
+		freebsd_x86    ("freebsd-x86", "freebsd-x86"),
+		freebsd_x86_64 ("freebsd-x86-64", "freebsd-x86-64"),
+		linux_aarch64  ("linux-aarch64", "linux-aarch64"),
+		linux_arm      ("linux-arm", "linux-arm"),
+		linux_ppc64    ("linux-ppc64", "linux-ppc64"),
+		linux_ppc64le  ("linux-ppc64le", "linux-ppc64le"),
+		linux_sparcv9  ("linux-sparcv9", "linux-sparcv9"),
+		linux_x86      ("linux-x86", "linux-x86"),
+		linux_x86_64   ("linux-x86-64", "linux-x86-64"),
+		openbsd_x86    ("openbsd-x86", "openbsd-x86"),
+		openbsd_x86_64 ("openbsd-x86-64", "openbsd-x86-64"),
+		sunos_sparc    ("sunos-sparc", "sunos-sparc"),
+		sunos_sparcv9  ("sunos-sparcv9", "sunos-sparcv9"),
+		sunos_x86      ("sunos-x86", "sunos-x86"),
+		sunos_x86_64   ("sunos-x86-64", "sunos-x86-64"),
+		w32ce_arm      ("w32ce-arm", "w32ce-arm");
+		
 		final String desc;
+		final String jnaPath;
 
-		Platform(String desc) {
+		Platform(String desc, String jnaPath) {
 			this.desc = desc;
+			this.jnaPath = jnaPath;
 		}
 
 		static Platform byDesc(String desc) throws IOException {
